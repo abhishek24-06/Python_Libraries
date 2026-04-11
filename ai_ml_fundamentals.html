@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI & ML Fundamentals</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0d0d0f;
+        --surface: #141417;
+        --surface2: #1c1c21;
+        --border: rgba(255, 255, 255, 0.07);
+        --border-hover: rgba(255, 255, 255, 0.14);
+        --text-primary: #f0efe8;
+        --text-secondary: #8a8981;
+        --text-muted: #555450;
+        --accent: #c8ff57;
+        --accent-dim: rgba(200, 255, 87, 0.08);
+        --accent-border: rgba(200, 255, 87, 0.2);
+
+        --purple-bg: rgba(111, 99, 255, 0.1);
+        --purple-border: rgba(111, 99, 255, 0.25);
+        --purple-text: #b3adff;
+        --teal-bg: rgba(29, 158, 117, 0.1);
+        --teal-border: rgba(29, 158, 117, 0.25);
+        --teal-text: #5dcaa5;
+        --amber-bg: rgba(239, 159, 39, 0.1);
+        --amber-border: rgba(239, 159, 39, 0.25);
+        --amber-text: #f0b856;
+        --coral-bg: rgba(216, 90, 48, 0.1);
+        --coral-border: rgba(216, 90, 48, 0.25);
+        --coral-text: #f0855a;
+        --blue-bg: rgba(55, 138, 221, 0.1);
+        --blue-border: rgba(55, 138, 221, 0.25);
+        --blue-text: #7ab8f0;
+        --green-bg: rgba(99, 153, 34, 0.1);
+        --green-border: rgba(99, 153, 34, 0.25);
+        --green-text: #97c459;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--bg);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* background grid */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.025) 1px,
+            transparent 1px
+          );
+        background-size: 48px 48px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* glow blob */
+      body::after {
+        content: "";
+        position: fixed;
+        top: -200px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 800px;
+        height: 500px;
+        background: radial-gradient(
+          ellipse,
+          rgba(200, 255, 87, 0.05) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .container {
+        position: relative;
+        z-index: 1;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 72px 24px 96px;
+      }
+
+      /* header */
+      .header {
+        margin-bottom: 64px;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeUp 0.7s ease forwards;
+      }
+
+      .eyebrow {
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .eyebrow::before {
+        content: "";
+        display: inline-block;
+        width: 20px;
+        height: 1px;
+        background: var(--accent);
+      }
+
+      h1 {
+        font-family: "Syne", sans-serif;
+        font-size: clamp(36px, 6vw, 60px);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+      }
+
+      h1 em {
+        font-style: normal;
+        color: var(--accent);
+      }
+
+      .header-sub {
+        font-size: 16px;
+        color: var(--text-secondary);
+        font-weight: 300;
+        line-height: 1.6;
+        max-width: 520px;
+      }
+
+      /* path indicator */
+      .path-bar {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 48px;
+        opacity: 0;
+        animation: fadeUp 0.7s ease 0.15s forwards;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      .path-step {
+        font-size: 12px;
+        font-weight: 500;
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        white-space: nowrap;
+        cursor: default;
+        transition: all 0.2s;
+      }
+
+      .path-step:hover {
+        border-color: var(--border-hover);
+        color: var(--text-secondary);
+      }
+
+      .path-arrow {
+        color: var(--text-muted);
+        font-size: 12px;
+        padding: 0 2px;
+      }
+
+      /* grid */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      @media (max-width: 700px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (min-width: 701px) and (max-width: 900px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* card */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s,
+          transform 0.2s;
+        opacity: 0;
+        transform: translateY(16px);
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: block;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          var(--card-accent, transparent) 0%,
+          transparent 60%
+        );
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        border-radius: inherit;
+      }
+
+      .card:hover {
+        border-color: var(--border-hover);
+        background: var(--surface2);
+        transform: translateY(-2px);
+      }
+
+      .card:hover::before {
+        opacity: 1;
+      }
+
+      .card.visible {
+        animation: fadeUp 0.5s ease forwards;
+      }
+
+      .card-inner {
+        position: relative;
+        z-index: 1;
+      }
+
+      /* pill */
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 3px 9px;
+        border-radius: 20px;
+        margin-bottom: 12px;
+        border: 1px solid;
+      }
+
+      .pill-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .pill-purple {
+        background: var(--purple-bg);
+        color: var(--purple-text);
+        border-color: var(--purple-border);
+      }
+      .pill-teal {
+        background: var(--teal-bg);
+        color: var(--teal-text);
+        border-color: var(--teal-border);
+      }
+      .pill-amber {
+        background: var(--amber-bg);
+        color: var(--amber-text);
+        border-color: var(--amber-border);
+      }
+      .pill-coral {
+        background: var(--coral-bg);
+        color: var(--coral-text);
+        border-color: var(--coral-border);
+      }
+      .pill-blue {
+        background: var(--blue-bg);
+        color: var(--blue-text);
+        border-color: var(--blue-border);
+      }
+      .pill-green {
+        background: var(--green-bg);
+        color: var(--green-text);
+        border-color: var(--green-border);
+      }
+
+      .card-title {
+        font-family: "Syne", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+        letter-spacing: -0.01em;
+      }
+
+      .card-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        font-weight: 300;
+        line-height: 1.5;
+        margin-bottom: 14px;
+      }
+
+      /* tags */
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .tag {
+        font-size: 11px;
+        color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 2px 7px;
+        transition:
+          color 0.2s,
+          border-color 0.2s;
+      }
+
+      .card:hover .tag {
+        color: var(--text-secondary);
+        border-color: var(--border-hover);
+      }
+
+      /* arrow indicator */
+      .card-arrow {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        font-size: 16px;
+        color: var(--text-muted);
+        opacity: 0;
+        transform: translate(-4px, 4px);
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+      }
+
+      .card:hover .card-arrow {
+        opacity: 1;
+        transform: translate(0, 0);
+      }
+
+      /* learning path section */
+      .path-section {
+        margin-top: 72px;
+        opacity: 0;
+        animation: fadeUp 0.7s ease 0.4s forwards;
+      }
+
+      .section-label {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+      }
+
+      .path-flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+        align-items: center;
+      }
+
+      .path-node {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 13px;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+        cursor: default;
+      }
+
+      .path-node:hover {
+        border-color: var(--border-hover);
+        color: var(--text-primary);
+      }
+
+      .path-node-num {
+        font-family: "Syne", sans-serif;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .path-connector {
+        width: 24px;
+        height: 1px;
+        background: var(--border);
+        flex-shrink: 0;
+      }
+
+      .path-flow-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .path-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+      }
+
+      /* footer */
+      .footer {
+        margin-top: 64px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        opacity: 0;
+        animation: fadeUp 0.7s ease 0.5s forwards;
+      }
+
+      .footer-left {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .footer-left span {
+        color: var(--accent);
+      }
+
+      .footer-right {
+        font-size: 12px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dot {
+        color: var(--accent);
+      }
+
+      /* modal overlay */
+      .modal-bg {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(8px);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
+      }
+
+      .modal-bg.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .modal {
+        background: var(--surface);
+        border: 1px solid var(--border-hover);
+        border-radius: 20px;
+        padding: 32px;
+        max-width: 560px;
+        width: 100%;
+        transform: translateY(20px) scale(0.97);
+        transition: transform 0.25s;
+      }
+
+      .modal-bg.open .modal {
+        transform: translateY(0) scale(1);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+
+      .modal-title {
+        font-family: "Syne", sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+      }
+
+      .modal-close {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 6px 10px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+
+      .modal-close:hover {
+        border-color: var(--border-hover);
+        color: var(--text-primary);
+      }
+
+      .modal-desc {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin-bottom: 20px;
+        font-weight: 300;
+      }
+
+      .modal-topics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 24px;
+      }
+
+      .modal-topic {
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+      }
+
+      .modal-cta {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn-primary {
+        flex: 1;
+        background: var(--accent);
+        color: #0d0d0f;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 20px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          opacity 0.2s,
+          transform 0.15s;
+      }
+
+      .btn-primary:hover {
+        opacity: 0.9;
+        transform: scale(0.99);
+      }
+
+      .btn-secondary {
+        background: var(--surface2);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 18px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-secondary:hover {
+        border-color: var(--border-hover);
+        color: var(--text-primary);
+      }
+
+      /* keyframes */
+      @keyframes fadeUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="modal-bg" id="modal" onclick="closeModal(event)">
+      <div class="modal" id="modal-inner">
+        <div class="modal-header">
+          <div class="modal-title" id="modal-title">—</div>
+          <button class="modal-close" onclick="closeModalDirect()">✕</button>
+        </div>
+        <p class="modal-desc" id="modal-desc"></p>
+        <div class="modal-topics" id="modal-topics"></div>
+        <div class="modal-cta">
+          <button class="btn-primary" id="modal-cta-btn">
+            Explore on Claude →
+          </button>
+          <button class="btn-secondary" onclick="closeModalDirect()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <header class="header">
+        <div class="eyebrow">Reference guide</div>
+        <h1>AI & ML<br /><em>Fundamentals</em></h1>
+        <p class="header-sub">
+          9 core areas — from the basics of learning from data to deploying
+          models in production. Click any card to explore.
+        </p>
+      </header>
+
+      <div class="grid" id="grid">
+        <div
+          class="card"
+          style="--card-accent: var(--purple-bg)"
+          data-title="What is ML?"
+          data-desc="Machine learning is the art of teaching computers to learn patterns from data rather than explicitly programming rules. The three core paradigms — supervised, unsupervised, and reinforcement learning — each describe a different relationship between the algorithm and the data it learns from. Key ideas: overfitting vs underfitting, the bias-variance tradeoff, training vs inference."
+          data-tags='["supervised","unsupervised","reinforcement","overfitting","bias-variance","training/inference"]'
+          data-url="https://claude.ai"
+        >
+          <span class="card-arrow">↗</span>
+          <div class="card-inner">
+            <span class="pill pill-purple"
+              ><span class="pill-dot"></span>Foundation</span
+            >
+            <div class="card-title">What is ML?</div>
+            <div class="card-desc">The core idea — learning from data</div>
+            <div class="tags">
+              <span class="tag">supervised</span>
+              <span class="tag">unsupervised</span>
+              <span class="tag">reinforcement</span>
+              <span class="tag">overfitting</span>
+              <span class="tag">bias-variance</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="--card-accent: var(--teal-bg)"
+          data-title="Classic Algorithms"
+          data-desc="The workhorses of ML: linear and logistic regression, decision trees, random forests, support vector machines, KNN, K-Means, and Naive Bayes. These are not old — they're still used daily in production. Understanding them builds the right intuition before neural networks complicate things."
+          data-tags='["linear regression","logistic regression","decision trees","random forests","SVM","KNN","K-Means","Naive Bayes"]'
+        >
+          <span class="card-arrow">↗</span>
+          <div class="card-inner">
+            <span class="pill pill-teal"
+              ><span class="pill-dot"></span>Algorithms</span
+            >
+            <div class="card-title">Classic algorithms</div>
+            <div class="card-desc">
+              The essential toolkit every ML engineer knows
+            </div>
+            <div class="tags">
+              <span class="tag">regression</span>
+              <span class="tag">decision trees</span>
+              <span class="tag">SVM</span>
+              <span class="tag">KNN</span>
+              <span class="tag">K-Means</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="--card-accent: var(--amber-bg)"
+          data-title="Neural Networks"
+          data-desc="The brain of deep learning. Start with a single neuron: weighted inputs, a bias, an activation function. Stack them into layers. Forward pass computes a prediction; the loss function measures how wrong it is; backpropagation computes gradients; gradient descent updates the weights. Repeat."
+          data-tags='["perceptron","weights & biases","activation functions","ReLU","sigmoid","softmax","loss functions","backpropagation","gradient descent"]'
+        >
+          <span class="card-arrow">↗</span>
+          <div class="card-inner">
+            <span class="pill pill-amber"
+              ><span class="pill-dot"></span>Core</span
+            >
+            <div class="card-title">Neural networks</div>
+            <div class="card-desc">How the brain of deep learning works</div>
+            <div class="tags">
+              <span class="tag">perceptron</span>
+              <span class="tag">backprop</span>
+              <span class="tag">activation fn</span>
+              <span class="tag">loss fn</span>
+              <span class="tag">gradient descent</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="--card-accent: var(--coral-bg)"
+          data-title="Deep Architectures"
+          data-desc="CNNs were invented for images — convolution extracts spatial features, pooling reduces dimensionality. RNNs handle sequences, but vanishing gradients led to LSTMs. Transformers solved long-range dependencies with self-attention, and now power every major language model. Each architecture was invented to solve a specific problem."
+          data-tags='["CNN","convolution","pooling","RNN","LSTM","Transformer","self-attention","positional encoding","encoder-decoder"]'
+        >
+          <span class="card-arrow">↗</span>
+          <div class="card-inner">
+            <span class="pill pill-coral"
+              ><span class="pill-dot"></span>Deep Learning</span
+            >
+            <div class="card-title">Deep architectures</div>
+            <div class="card-desc">CNN, RNN, LSTM, Transformer</div>
+            <div class="tags">
+              <span class="tag">CNN</span>
+              <span class="tag">RNN / LSTM</span>
+              <span class="tag">Transformer</span>
+              <span class="tag">attention</span>
+              <span class="tag">encoder-decoder</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="--card-accent: var(--blue-bg)"
+          data-title="Data & Preprocessing"
+          data-desc="Most real ML work happens here. Handling missing values, feature engineering, normalization vs standardization, encoding categoricals, train/val/test splits, cross-validation, and dealing with class imbalance (SMOTE, class weights). Poor preprocessing ruins a great model; good preprocessing saves a mediocre one."
+          data-tags='["missing values","feature engineering","normalization","standardization","one-hot encoding","train/val/test","cross-validation","SMOTE","class imbalance"]'
+        >
+          <span class="card-arrow">↗</span>
+          <div class="card-inner">
+            <span class="pill pill-blue"
+              ><span class="pill-dot"></span>Pipeline</span
+            >
+            <div class="card-title">Data & preprocessing</div>
+            <div class="card-desc">How you prepare data for models</div>
+            <div class="tags">
+              <span class="tag">feature engineering</span>
+              <span class="tag">scaling</span>
+              <span class="tag">encoding</span>
+              <span class="tag">cross-validation</span>
+              <span class="tag">SMOTE</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="--card-accent: var(--green-bg)"
+          data-title="Metrics & Evaluation"
+          data-desc="How you know if your model is actually good. Accuracy is misleading on imbalanced data — you need precision, recall, F1, and ROC-AUC for classification. RMSE, MAE, and R² for regression. The confusion matrix tells the whole story. Knowing when to optimise for precision vs recall separates practitioners from beginners."
+          data-tags='["accuracy","precision","recall","F1 score","ROC-AUC","confusion matrix","RMSE","MAE","R²"]'
+        >
+          <span class="card-arrow">↗</span>
+          <div class="card-inner">
+            <span class="pill pill-green"
+              ><span class="pill-dot"></span>Evaluation</span
+            >
+            <div class="card-title">Metrics & evaluation</div>
+            <div class="card-desc">How you know if your model is any good</div>
+            <div class="tags">
+              <span class="tag">accuracy</span>
+              <span class="tag">precision/recall</span>
+              <span class="tag">F1</span>
+              <span class="tag">ROC-AUC</span>
+              <span class="tag">RMSE</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="--card-accent: var(--purple-bg)"
+          data-title="Training & Tuning"
+          data-desc="Getting the most out of your model. L1/L2 regularization prevents overfitting. Dropout randomly kills neurons during training. Learning rate schedules warm up then decay. Adam adapts per-parameter learning rates. Batch size affects gradient noise. Hyperparameter search (grid, random, Bayesian) finds the best config without exhaustive manual search."
+          data-tags='["L1/L2 regularization","dropout","early stopping","Adam","SGD","learning rate schedule","batch size","grid search","Bayesian optimization"]'
+        >
+          <span class="card-arrow">↗</span>
+          <div class="card-inner">
+            <span class="pill pill-purple"
+              ><span class="pill-dot"></span>Optimization</span
+            >
+            <div class="card-title">Training & tuning</div>
+            <div class="card-desc">Getting the most out of your model</div>
+            <div class="tags">
+              <span class="tag">regularization</span>
+              <span class="tag">Adam / SGD</span>
+              <span class="tag">learning rate</span>
+              <span class="tag">dropout</span>
+              <span class="tag">hyperparameter tuning</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="--card-accent: var(--teal-bg)"
+          data-title="LLMs & Generative AI"
+          data-desc="Transformers at scale become LLMs. Pre-training on vast text teaches world knowledge; fine-tuning specialises them; RLHF aligns them to human preferences. Embeddings turn meaning into geometry. RAG (retrieval augmented generation) plugs in fresh knowledge at inference time. Diffusion models learn to reverse a noise process to generate images."
+          data-tags='["LLMs","pre-training","fine-tuning","RLHF","prompt engineering","embeddings","RAG","vector databases","diffusion models"]'
+        >
+          <span class="card-arrow">↗</span>
+          <div class="card-inner">
+            <span class="pill pill-teal"
+              ><span class="pill-dot"></span>Modern AI</span
+            >
+            <div class="card-title">LLMs & GenAI</div>
+            <div class="card-desc">How modern AI systems like Claude work</div>
+            <div class="tags">
+              <span class="tag">LLMs</span>
+              <span class="tag">fine-tuning</span>
+              <span class="tag">RLHF</span>
+              <span class="tag">RAG</span>
+              <span class="tag">embeddings</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="card"
+          style="--card-accent: var(--amber-bg)"
+          data-title="Deployment & MLOps"
+          data-desc="Taking models from notebook to production. Serve predictions via FastAPI as a REST endpoint. Track experiments with MLflow. Version data with DVC. Containerize with Docker. Monitor for data drift and performance decay. CI/CD pipelines automate retraining. Feature stores prevent training-serving skew. This is the engineering that makes ML actually useful."
+          data-tags='["FastAPI","REST API","MLflow","Docker","DVC","model monitoring","data drift","CI/CD for ML","feature stores"]'
+        >
+          <span class="card-arrow">↗</span>
+          <div class="card-inner">
+            <span class="pill pill-amber"
+              ><span class="pill-dot"></span>MLOps</span
+            >
+            <div class="card-title">Deployment & MLOps</div>
+            <div class="card-desc">
+              Taking models from notebook to production
+            </div>
+            <div class="tags">
+              <span class="tag">FastAPI</span>
+              <span class="tag">MLflow</span>
+              <span class="tag">Docker</span>
+              <span class="tag">monitoring</span>
+              <span class="tag">data drift</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="path-section">
+        <div class="section-label">Recommended learning path</div>
+        <div
+          style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center"
+        >
+          <div class="path-node">
+            <span class="path-node-num">01</span> What is ML?
+          </div>
+          <span style="color: var(--text-muted); font-size: 14px">→</span>
+          <div class="path-node">
+            <span class="path-node-num">02</span> Classic algorithms
+          </div>
+          <span style="color: var(--text-muted); font-size: 14px">→</span>
+          <div class="path-node">
+            <span class="path-node-num">03</span> Neural networks
+          </div>
+          <span style="color: var(--text-muted); font-size: 14px">→</span>
+          <div class="path-node">
+            <span class="path-node-num">04</span> Deep architectures
+          </div>
+          <span style="color: var(--text-muted); font-size: 14px">→</span>
+          <div class="path-node">
+            <span class="path-node-num">05</span> Data & preprocessing
+          </div>
+          <span style="color: var(--text-muted); font-size: 14px">→</span>
+          <div class="path-node">
+            <span class="path-node-num">06</span> Evaluation
+          </div>
+          <span style="color: var(--text-muted); font-size: 14px">→</span>
+          <div class="path-node">
+            <span class="path-node-num">07</span> Optimization
+          </div>
+          <span style="color: var(--text-muted); font-size: 14px">→</span>
+          <div class="path-node">
+            <span class="path-node-num">08</span> GenAI
+          </div>
+          <span style="color: var(--text-muted); font-size: 14px">→</span>
+          <div class="path-node">
+            <span class="path-node-num">09</span> MLOps
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="footer-left">
+          <span>9 areas</span> · AI & ML Fundamentals reference
+        </div>
+        <div class="footer-right">
+          Click any card to explore <span class="dot">·</span> Sem VI IT
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      // Card click → open modal
+      const cards = document.querySelectorAll(".card");
+      const modal = document.getElementById("modal");
+      const modalTitle = document.getElementById("modal-title");
+      const modalDesc = document.getElementById("modal-desc");
+      const modalTopics = document.getElementById("modal-topics");
+      const modalCtaBtn = document.getElementById("modal-cta-btn");
+
+      // stagger card entrance
+      cards.forEach((card, i) => {
+        card.style.animationDelay = `${0.1 + i * 0.06}s`;
+        card.classList.add("visible");
+        card.addEventListener("click", () => {
+          const title = card.dataset.title;
+          const desc = card.dataset.desc;
+          const tags = JSON.parse(card.dataset.tags || "[]");
+
+          modalTitle.textContent = title;
+          modalDesc.textContent = desc;
+          modalTopics.innerHTML = tags
+            .map((t) => `<span class="modal-topic">${t}</span>`)
+            .join("");
+
+          const query = encodeURIComponent(
+            `Explain ${title} in AI/ML with intuition, examples, and diagrams`,
+          );
+          modalCtaBtn.onclick = () =>
+            window.open(`https://claude.ai/new?q=${query}`, "_blank");
+
+          modal.classList.add("open");
+          document.body.style.overflow = "hidden";
+        });
+      });
+
+      function closeModal(e) {
+        if (e.target === modal) closeModalDirect();
+      }
+
+      function closeModalDirect() {
+        modal.classList.remove("open");
+        document.body.style.overflow = "";
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModalDirect();
+      });
+    </script>
+  </body>
+</html>
